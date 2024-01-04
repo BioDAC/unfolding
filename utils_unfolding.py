@@ -239,6 +239,41 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     n_triangle = np.cross(coord_3d[1] - coord_3d[0], coord_3d[2] - coord_3d[0])
     n_triangle = n_triangle / np.linalg.norm(n_triangle)
 
+    # Crop im to only the area that could end up in the output
+    coord_3d_plus = [
+        coord_3d_corner + n_layers * n_triangle for coord_3d_corner in coord_3d
+    ]
+    coord_3d_minus = [
+        coord_3d_corner - n_layers * n_triangle for coord_3d_corner in coord_3d
+    ]
+
+    crop_min = np.min(
+        [np.min(coord_3d_plus, axis=0), np.min(coord_3d_minus, axis=0)], axis=0
+    )
+    crop_max = np.max(
+        [np.max(coord_3d_plus, axis=0), np.max(coord_3d_minus, axis=0)], axis=0
+    )
+    crop_min = np.max([crop_min - 5, [0, 0, 0]], axis=0).astype(int)
+    crop_max = np.min([crop_max + 5, im.shape], axis=0).astype(int)
+
+    im_cropped = im[
+        crop_min[0] : crop_max[0], crop_min[1] : crop_max[1], crop_min[2] : crop_max[2]
+    ].copy()
+    mask_cropped = mask[
+        crop_min[0] : crop_max[0], crop_min[1] : crop_max[1], crop_min[2] : crop_max[2]
+    ].copy()
+
+    # print(crop_min)
+
+    coord_3d = [coord - crop_min for coord in coord_3d]
+
+    # im_cropped = im.copy()
+    # mask_cropped = mask.copy()
+
+    # print(im_cropped.shape)
+
+    # print(coord_3d)
+
     # Rotate about the x axis to align with z
     if (n_triangle[2] == 0) and (n_triangle[1] == 0):
         angle = 0
@@ -247,16 +282,12 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
             n_triangle[2] / np.sqrt(n_triangle[2] ** 2 + n_triangle[1] ** 2)
         ) * np.sign(n_triangle[1])
 
-    im_rot, mask_rot = rotate_im_and_mask(im, mask, angle, (1, 2))
+    im_rot, mask_rot = rotate_im_and_mask(im_cropped, mask_cropped, angle, (1, 2))
 
     # Update vertice positions
     axes = [1, 2]
-    middle_voxel_before = np.array(
-        [mask.shape[0] / 2, mask.shape[1] / 2, mask.shape[2] / 2]
-    )
-    middle_voxel_after = np.array(
-        [mask_rot.shape[0] / 2, mask_rot.shape[1] / 2, mask_rot.shape[2] / 2]
-    )
+    middle_voxel_before = np.asarray(mask_cropped.shape) / 2
+    middle_voxel_after = np.asarray(mask_rot.shape) / 2
     n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
@@ -268,6 +299,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
             [angle] * len(coord_3d),
         )
     )
+    # print(coord_3d)
 
     # print('x rotation done!')
 
@@ -281,9 +313,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     # Update vertice positions
     axes = [0, 2]
     middle_voxel_before = middle_voxel_after.copy()
-    middle_voxel_after = np.array(
-        [mask_rot.shape[0] / 2, mask_rot.shape[1] / 2, mask_rot.shape[2] / 2]
-    )
+    middle_voxel_after = np.asarray(mask_rot.shape) / 2
     n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
@@ -295,6 +325,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
             [angle] * len(coord_3d),
         )
     )
+    # print(coord_3d)
 
     # print('y rotation done!')
 
@@ -318,9 +349,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     # Update vertice positions
     axes = [0, 1]
     middle_voxel_before = middle_voxel_after.copy()
-    middle_voxel_after = np.array(
-        [mask_rot.shape[0] / 2, mask_rot.shape[1] / 2, mask_rot.shape[2] / 2]
-    )
+    middle_voxel_after = np.asarray(mask_rot.shape) / 2
     n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
@@ -332,12 +361,33 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
             [angle] * len(coord_3d),
         )
     )
+    # print(coord_3d)
 
     # print('z rotation done!')
 
-    # Extract layers around triangle
-    triangle_slice = int(coord_3d[0][2])
+    # Shift image to an integer middle
+    triangle_slice = int(np.round(coord_3d[0][2]))
+    # shift = coord_3d[0][2] - triangle_slice
+    # print(shift)
 
+    # mask_rot = scipy.ndimage.shift(
+    #     mask_rot,
+    #     [0,0,shift],
+    #     order=3,
+    #     mode="constant",
+    #     cval=0.0,
+    #     prefilter=False,
+    # )
+    # im_rot = scipy.ndimage.shift(
+    #     im_rot,
+    #     [0,0,shift],
+    #     order=3,
+    #     mode="constant",
+    #     cval=0.0,
+    #     prefilter=False,
+    # )
+
+    # Extract layers around triangle
     layers = np.zeros([im_rot.shape[0], im_rot.shape[1], 2 * n_layers + 1])
     first_slice = np.max([triangle_slice - n_layers, 0])
     last_slice = np.min([triangle_slice + n_layers + 1, im_rot.shape[2]])
@@ -353,7 +403,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     mask_rot = np.max(mask_rot, axis=2) > 0.1
     layers *= np.tile(np.expand_dims(mask_rot, 2), [1, 1, 2 * n_layers + 1])
 
-    # Crop mip
+    # Crop layers
     x = np.where(np.sum(mask_rot, axis=0) > 0)[0]
     y = np.where(np.sum(mask_rot, axis=1) > 0)[0]
     layers = layers[y[0] : (y[-1] + 1), x[0] : (x[-1] + 1)]
@@ -396,7 +446,7 @@ def rotate_im_and_mask(im, mask, angle, axes):
         order=3,
         mode="constant",
         cval=0.0,
-        prefilter=True,
+        prefilter=False,
     )
     im_rot = scipy.ndimage.rotate(
         im,
@@ -406,7 +456,7 @@ def rotate_im_and_mask(im, mask, angle, axes):
         order=3,
         mode="constant",
         cval=0.0,
-        prefilter=True,
+        prefilter=False,
     )
     return im_rot, mask_rot
 

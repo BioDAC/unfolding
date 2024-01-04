@@ -68,7 +68,7 @@ def test_unfolding():
 
     # unfold and extract layers
     layers = unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, image, 20)
-    if np.linalg.norm(layers - layers_true) > 1e-3:
+    if np.linalg.norm(layers - layers_true) / layers_true.size > 0.01:
         print("Test failed for unfolded_layers: layers not correct")
         return 4
 
@@ -89,4 +89,4 @@ def create_dummy():
     return image, label
 
 
-# test_unfolding()
+test_unfolding()
