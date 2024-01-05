@@ -15,28 +15,25 @@ from src.utils_unfolding import (
 
 def test_unfolding():
     # load ground truth values
-    with open(
-        "C://Users//ak2557//OneDrive - University of Cambridge//Documents//Zebrafish//Unfolding//test//verts.npy",
-        "rb",
-    ) as f:
+    with open("test/verts.npy", "rb") as f:
         verts_true = np.load(f)
     with open(
-        "C://Users//ak2557//OneDrive - University of Cambridge//Documents//Zebrafish//Unfolding//test//faces.npy",
+        "test/faces.npy",
         "rb",
     ) as f:
         faces_true = np.load(f)
     with open(
-        "C://Users//ak2557//OneDrive - University of Cambridge//Documents//Zebrafish//Unfolding//test//verts_2d.npy",
+        "test/verts_2d.npy",
         "rb",
     ) as f:
         verts_2d_true = np.load(f)
     with open(
-        "C://Users//ak2557//OneDrive - University of Cambridge//Documents//Zebrafish//Unfolding//test//faces_2d.npy",
+        "test/faces_2d.npy",
         "rb",
     ) as f:
         faces_2d_true = np.load(f)
     with open(
-        "C://Users//ak2557//OneDrive - University of Cambridge//Documents//Zebrafish//Unfolding//test//layers.npy",
+        "test/layers.npy",
         "rb",
     ) as f:
         layers_true = np.load(f)
@@ -68,11 +65,11 @@ def test_unfolding():
     layers = unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, image, 20)
     if np.linalg.norm(layers - layers_true) / layers_true.size > 0.01:
         print("Test failed for unfolded_layers: layers not correct")
-        return 4
+        return 5
 
     print("Everything ok.")
 
-    return 0
+    return None
 
 
 def create_dummy():

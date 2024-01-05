@@ -98,7 +98,7 @@ def unfold_tessellation(verts, faces, base_triangle, draw):
             )
 
             if len(face_index[0]) != 0:
-                current_face = faces_copy[int(face_index[0])]
+                current_face = faces_copy[int(face_index[0][0])]
                 new_vertice_3d = current_face[~np.isin(current_face, edge_3d)]
                 current_face = np.concatenate([edge_3d, new_vertice_3d])
 
@@ -123,7 +123,7 @@ def unfold_tessellation(verts, faces, base_triangle, draw):
                     current_face_2d = np.concatenate([edge, np.array([len(verts_2d)])])
                     verts_2d.append(triang_2d[2])
                     faces_2d.append(np.array(current_face_2d))
-                    dict_2d_3d.append(int(new_vertice_3d))
+                    dict_2d_3d.append(int(new_vertice_3d[0]))
 
                     # Update new outer_edges and remove triangle from faces_copy
                     outer_edges_next.append(current_face_2d[[0, 2]])
