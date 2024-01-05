@@ -5,10 +5,8 @@ Created on Tue Jan  2 12:56:15 2024
 """
 
 import numpy as np
-import sys
 
-sys.path.append("../")
-from utils_unfolding import (  # noqa: E402
+from src.utils_unfolding import (
     create_simplified_tessellation,
     unfold_tessellation,
     unfolded_layers,
@@ -89,4 +87,4 @@ def create_dummy():
     return image, label
 
 
-test_unfolding()
+# test_unfolding()
