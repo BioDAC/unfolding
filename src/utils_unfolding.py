@@ -22,7 +22,7 @@ import pymeshlab as ml
 
 def create_simplified_tessellation(label, num_vertices=30):
     # label: 3D numpy array label map (binary values)
-    # num_vertices: number of vertices (default = 100)
+    # num_vertices: number of vertices (default = 30)
 
     verts, faces, _, _ = skimage.measure.marching_cubes(
         label, 0.0, step_size=2, allow_degenerate=False
@@ -52,9 +52,9 @@ def create_simplified_tessellation(label, num_vertices=30):
 
 
 def unfold_tessellation(verts, faces, base_triangle, draw):
-    # verts,faces: 3D vertice coordinates and triangle faces from create_simplified_tessellation
-    # base_triangle: index of the first triangle to draw
-    # draw: if ==1, this function will also plot the traingles of the unfolded tessellation
+    # verts,faces: 3D vertex coordinates and triangle faces from create_simplified_tessellation
+    # base_triangle: index of the first triangle to draw (this will be the middle of the unfolded image)
+    # draw: if ==1, this function will also plot the triangles of the unfolded tessellation
 
     # Draw base triangle
     faces_copy = faces.copy()
@@ -167,8 +167,8 @@ def find_2d_coordinates(vertices_3D, vertices_2D, orientation):
 def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
     # verts, faces: 3D vertice coordinates and triangle faces from create_simplified_tessellation
     # verts_2d, faces_2d, dict_2d_3d: 2D vertice coordinates and triangle faces,
-    # and the correspondance dictionary between 3D and 2D vertices from unfold_tessellation
-    # im: 3D numpy array containing the image
+    # and the correspondence dictionary between 3D and 2D vertices from unfold_tessellation
+    # im: 3D numpy array containing the grayscale image
     # n_layers: number of layers to be exported on both sides of the tessellation
 
     # Create an image to save the unfolded layers
