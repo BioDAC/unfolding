@@ -7,10 +7,15 @@ Created on Fri Jan  5 10:25:57 2024
 
 import numpy as np
 
-from src.utils_unfolding import (
+# import sys
+
+# sys.path.append("../")
+from src.utils_unfolding import (  # noqa: E402
     create_simplified_tessellation,
     unfold_tessellation,
     unfolded_layers,
+    draw_triangles_in_3d_and_2d,
+    show_3d_and_contours,
 )
 
 
@@ -30,7 +35,9 @@ def create_dummy():
 image, label = create_dummy()
 
 # create simplified tessellation
-verts, faces = create_simplified_tessellation(label, num_vertices=30)
+verts, faces = create_simplified_tessellation(
+    label, num_vertices=30, initial_step_size=2
+)
 # num_vertices: target number of vertices in the simplified tessellation
 
 # unfold tessellation
@@ -47,3 +54,10 @@ layers = unfolded_layers(
 )
 # n_layers: number of layers to be exported on both sides of the surface
 # (i.e. layers will have 2*n_layers+1 slices)
+
+# IN DEVELOPMENT: create coloured plots for establishing correspondence between 2d and 3d
+triangles_3d, triangles_2d = draw_triangles_in_3d_and_2d(
+    verts, faces, verts_2d, faces_2d, dict_2d_3d, image.shape
+)
+# show_3d_and_contours(image,triangles_3d,[0,5])
+show_3d_and_contours(np.max(layers, axis=2, keepdims=True), triangles_2d, [0, 5])

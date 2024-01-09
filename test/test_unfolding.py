@@ -6,7 +6,10 @@ Created on Tue Jan  2 12:56:15 2024
 
 import numpy as np
 
-from src.utils_unfolding import (
+# import sys
+
+# sys.path.append("../")
+from src.utils_unfolding import (  # noqa: E402
     create_simplified_tessellation,
     unfold_tessellation,
     unfolded_layers,
