@@ -5,14 +5,14 @@
 ABOUT
 -------------------------------------------------------------------------------
 Unfolding is a Python-based tool for unfolding 3D surfaces in a grayscale image
-into a 2D plane. It requires the 3D grayscale image a binary segmentation as
+into a 2D plane. It requires the 3D grayscale image and a binary segmentation as
 inputs. The surface of the segmentation is tessellated and layers parallel to
 the surface are extracted from the grayscale image, and unfolded into 2D.
 
 
 HOW TO USE
 -------------------------------------------------------------------------------
-First install required packages, see dependencies.
+First, install required packages (see Dependencies).
 
 To perform unfolding (see src/Unfolding.py):
 
@@ -76,7 +76,7 @@ CONTACT INFORMATION
 -------------------------------------------------------------------------------
 Anita Karsa, Ph.D.
 
-Dept. of Physiology and Developmental Neuroscience
+Dept. of Physiology, Development, and Neuroscience
 
 University of Cambridge,
 
