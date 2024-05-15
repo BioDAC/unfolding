@@ -57,6 +57,13 @@ HOW TO ACKNOWLEDGE
 
 }
 
+INSTALLATION
+-------------------------------------------------------------------------------
+```bash
+pip install git+https://github.com/akarsa/unfolding
+```
+
+
 DEPENDENCIES
 -------------------------------------------------------------------------------
 numpy (https://numpy.org)

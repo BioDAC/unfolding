@@ -1,0 +1,16 @@
+# Conda environment installing necessary packages 
+name: unfolding
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - ipykernel
+  - numpy
+  - scipy
+  - scikit-image
+  - matplotlib
+  - ipywidgets
+  - tqdm
+  - pip
+  - pip:
+    - pymeshlab

@@ -9,7 +9,7 @@ import numpy as np
 # import sys
 
 # sys.path.append("../")
-from src.utils_unfolding import (  # noqa: E402
+from unfolding._tessellation import (  # noqa: E402
     create_simplified_tessellation,
     unfold_tessellation,
     unfolded_layers,
