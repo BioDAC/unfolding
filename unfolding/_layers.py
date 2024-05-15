@@ -1,8 +1,11 @@
 """Layer extraction from unfolded surface"""
 
+from tqdm import tqdm
+
 import numpy as np
 from scipy import ndimage as ndi
-from tqdm import tqdm
+
+from ._utils import triangle_area
 
 
 def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
@@ -263,13 +266,6 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     # print('layers extracted!')
 
     return layers, coord_new
-
-
-def triangle_area(vertices):
-    return (
-        np.linalg.norm(np.cross(vertices[1] - vertices[0], vertices[2] - vertices[0]))
-        / 2
-    )
 
 
 def rotate_im_and_mask(im, mask, angle, axes):

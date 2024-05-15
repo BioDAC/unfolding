@@ -9,6 +9,7 @@ dependencies:
   - scipy
   - scikit-image
   - matplotlib
+  - jupyterlab
   - ipywidgets
   - tqdm
   - pip

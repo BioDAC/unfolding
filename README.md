@@ -59,6 +59,8 @@ HOW TO ACKNOWLEDGE
 
 INSTALLATION
 -------------------------------------------------------------------------------
+
+To install the package:
 ```bash
 pip install git+https://github.com/akarsa/unfolding
 ```
