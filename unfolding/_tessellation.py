@@ -80,9 +80,9 @@ def unfold_tessellation(
     verts_2d: ndarray
         Vertices of the 2D mesh
     faces_2d: ndarray
-        Faces of the 2D maesh
+        Faces of the 2D mash
     dict_2d_3d: dict
-        Mapping 2D to 3D
+        Mapping indices of 2D to 3D vertices
 
     """
 
@@ -140,7 +140,7 @@ def unfold_tessellation(
                 if not np.isnan(new_coordinate[0]):
                     triang_2d.append(new_coordinate)
 
-                    if draw == 1:
+                    if draw is True:
                         draw_2d_triangle(triang_2d)
                         plt.text(
                             triang_2d[2][0],

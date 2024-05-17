@@ -3,6 +3,7 @@ import numpy as np
 
 def dummy():
     """Create a dummy image and label"""
+
     x, y, z = np.meshgrid(
         np.linspace(0, 1, 100), np.linspace(0, 1, 100), np.linspace(0, 1, 100)
     )
@@ -11,6 +12,19 @@ def dummy():
 
     label = ((x - 0.5) ** 2 + (y - 0.5) ** 2 + (z - 0.5) ** 2) < 0.2**2
 
+    return image, label
+
+
+def half_sphere():
+    x, y, z = np.meshgrid(
+        np.linspace(0, 1, 100), np.linspace(0, 1, 100), np.linspace(0, 1, 100)
+    )
+
+    image = np.cos(2 * np.pi * x) * np.cos(2 * np.pi * y) * np.cos(2 * np.pi * z)
+    # image = x + y + z
+    label = (
+        (x - 0.5) ** 2 + (y - 0.5) ** 2 + (z + 0.1 * np.sin(4 * (x + y)) - 1) ** 2
+    ) < 0.5**2
     return image, label
 
 

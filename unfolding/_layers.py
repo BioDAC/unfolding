@@ -24,6 +24,7 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
     -------
     layers: ndarray
 
+
     """
 
     # Create an image to save the unfolded layers
