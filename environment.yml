@@ -1,4 +1,3 @@
-# Conda environment installing necessary packages 
 name: unfolding
 channels:
   - conda-forge
@@ -8,10 +7,16 @@ dependencies:
   - numpy
   - scipy
   - scikit-image
+  - scikit-learn
   - matplotlib
   - jupyterlab
   - ipywidgets
+  - ipympl
   - tqdm
+  - pytest
   - pip
+  - dask
+  - zarr
   - pip:
     - pymeshlab
+    - fast_simplification

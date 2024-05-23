@@ -4,11 +4,13 @@ from tqdm import tqdm
 
 import numpy as np
 from scipy import ndimage as ndi
+from scipy import interpolate
+from math import floor, ceil
 
 from ._utils import triangle_area
 
 
-def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
+def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, spacing=[1,1,1], n_layers=1):
     """
     Extract layers from the volume
 
@@ -18,6 +20,8 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
     verts_2d, faces_2d, dict_2d_3d: 2D vertice coordinates and triangle faces,
     and the correspondence dictionary between 3D and 2D vertices from unfold_tessellation
     im: 3D numpy array containing the grayscale image
+    spacing: ndarray 
+    pixel spacing
     n_layers: number of layers to be exported on both sides of the tessellation
 
     Returns
@@ -26,7 +30,8 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
 
 
     """
-
+    verts = [v/spacing for v in verts]
+    verts_2d = [v/spacing[:2] for v in verts_2d]
     # Create an image to save the unfolded layers
     x = [vert[0] for vert in verts_2d]
     pix_x0 = np.min(x)
@@ -48,7 +53,7 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
 
         if triangle_area(coord_3d) > 1e-10:
             # Get mip perpendicular to triangle
-            layers_crop, coord_new = get_perp_layers(coord_3d, coord_2d, im, n_layers)
+            layers_crop, coord_new = _get_perp_layers(coord_3d, coord_2d, im, n_layers)
 
             # Check that both triangles have the same size using one side
             assert (
@@ -76,7 +81,7 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, n_layers):
     return layers
 
 
-def get_perp_layers(coord_3d, coord_2d, im, n_layers):
+def _get_perp_layers(coord_3d, coord_2d, im, n_layers):
     # Create mask of triangle to follow evolution of the image
     mask = np.zeros(im.shape)
     targets = [
@@ -86,7 +91,13 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     for target in targets:
         for epsilon in np.linspace(0, 1, 200):
             point = coord_3d[0] + (target - coord_3d[0]) * epsilon
-            mask[int(point[0]), int(point[1]), int(point[2])] = 1
+            # check that the point is in the mask
+            if (
+                int(point[0]) < mask.shape[0]
+                and int(point[1]) < mask.shape[1]
+                and int(point[2]) < mask.shape[2]
+            ):
+                mask[int(point[0]), int(point[1]), int(point[2])] = 1
 
     # print('Triangle done!')
     # im2 = im + mask*200
@@ -138,16 +149,16 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
             n_triangle[2] / np.sqrt(n_triangle[2] ** 2 + n_triangle[1] ** 2)
         ) * np.sign(n_triangle[1])
 
-    im_rot, mask_rot = rotate_im_and_mask(im_cropped, mask_cropped, angle, (1, 2))
+    im_rot, mask_rot = _rotate_im_and_mask(im_cropped, mask_cropped, angle, (1, 2))
 
     # Update vertice positions
     axes = [1, 2]
     middle_voxel_before = np.asarray(mask_cropped.shape) / 2
     middle_voxel_after = np.asarray(mask_rot.shape) / 2
-    n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
+    n_triangle = _rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
-            rotate_point,
+            _rotate_point,
             coord_3d,
             [axes] * len(coord_3d),
             [middle_voxel_before] * len(coord_3d),
@@ -164,16 +175,16 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
         n_triangle[2] / np.sqrt(n_triangle[2] ** 2 + n_triangle[0] ** 2)
     ) * np.sign(n_triangle[0])
 
-    im_rot, mask_rot = rotate_im_and_mask(im_rot, mask_rot, angle, (0, 2))
+    im_rot, mask_rot = _rotate_im_and_mask(im_rot, mask_rot, angle, (0, 2))
 
     # Update vertice positions
     axes = [0, 2]
     middle_voxel_before = middle_voxel_after.copy()
     middle_voxel_after = np.asarray(mask_rot.shape) / 2
-    n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
+    n_triangle = _rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
-            rotate_point,
+            _rotate_point,
             coord_3d,
             [axes] * len(coord_3d),
             [middle_voxel_before] * len(coord_3d),
@@ -200,16 +211,16 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
 
     angle = target_angle - current_angle
 
-    im_rot, mask_rot = rotate_im_and_mask(im_rot, mask_rot, angle, (0, 1))
+    im_rot, mask_rot = _rotate_im_and_mask(im_rot, mask_rot, angle, (0, 1))
 
     # Update vertice positions
     axes = [0, 1]
     middle_voxel_before = middle_voxel_after.copy()
     middle_voxel_after = np.asarray(mask_rot.shape) / 2
-    n_triangle = rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
+    n_triangle = _rotate_point(n_triangle, axes, np.zeros(3), np.zeros(3), angle)
     coord_3d = list(
         map(
-            rotate_point,
+            _rotate_point,
             coord_3d,
             [axes] * len(coord_3d),
             [middle_voxel_before] * len(coord_3d),
@@ -269,7 +280,7 @@ def get_perp_layers(coord_3d, coord_2d, im, n_layers):
     return layers, coord_new
 
 
-def rotate_im_and_mask(im, mask, angle, axes):
+def _rotate_im_and_mask(im, mask, angle, axes):
     mask_rot = ndi.rotate(
         mask,
         angle / (2 * np.pi) * 360,
@@ -293,7 +304,7 @@ def rotate_im_and_mask(im, mask, angle, axes):
     return im_rot, mask_rot
 
 
-def rotate_point(vector, axes, middle_point_before, middle_point_after, angle):
+def _rotate_point(vector, axes, middle_point_before, middle_point_after, angle):
     rot_matrix = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
     )
@@ -401,3 +412,167 @@ def draw_triangles_in_3d_and_2d(verts, faces, verts_2d, faces_2d, dict_2d_3d, im
         colour += 1
 
     return triangles_3d, triangles_2d
+
+
+def _points_in_triangle(grid, triangle):
+    """
+    List the points of the grid inside the triangle
+
+    Parameters
+    ----------
+    grid: ndarray (N,3)
+        3D grid
+    triangle: ndarray (3,2)
+        2D Triangle
+
+    Returns
+    -------
+    Indices
+    points: ndarray (N,3)
+        Coordinates of the points in the triangle
+    """
+
+    # find points of the grid in the triangle bounding box
+    lower = np.min(triangle, axis=0)
+    upper = np.max(triangle, axis=0)
+    idx = np.where(
+        np.logical_and(
+            np.all(grid[:, :2] >= lower, axis=1), np.all(grid[:, :2] <= upper, axis=1)
+        )
+    )[0]
+
+    # find points in the triangle
+    # https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
+    x, y = grid[idx, 0], grid[idx, 1]
+    ax, ay = triangle[0]
+    bx, by = triangle[1]
+    cx, cy = triangle[2]
+    side_1 = np.sign((x - bx) * (ay - by) - (ax - bx) * (y - by))
+    side_2 = np.sign((x - cx) * (by - cy) - (bx - cx) * (y - cy))
+    side_3 = np.sign((x - ax) * (cy - ay) - (cx - ax) * (y - ay))
+    # take into account points on the edge
+    inside = np.ones(side_1.shape, dtype=bool)
+    inside[np.logical_and(side_1 == 1, side_2 == -1)] = False
+    inside[np.logical_and(side_1 == -1, side_2 == 1)] = False
+    inside[np.logical_and(side_1 == 1, side_3 == -1)] = False
+    inside[np.logical_and(side_1 == -1, side_3 == 1)] = False
+    # inside = np.all(np.stack((side_1 == side_2, side_1 == side_3), axis=1), axis=1)
+    return idx[inside]
+
+
+def _map_point_in_triangle(points, triangle1, triangle2):
+    """
+    Map a point in triangle1 to a point in triangle2
+
+    Parameters
+    ----------
+    points: ndarray (N,3)
+    triangle1: ndarray (3,2)
+    triangle2: ndarray (3,3)
+
+    Returns
+    -------
+    point: ndarray (N,3)
+    """
+    # basis change from xyz to triangle 1 system
+    P = np.stack(
+        (
+            triangle1[1] - triangle1[0],
+            triangle1[2] - triangle1[0],
+            np.cross(triangle1[1] - triangle1[0], triangle1[2] - triangle1[0]),
+        ),
+        axis=1,
+    )
+    # basis change from xyz to triangle 2 system
+    Q = np.stack(
+        (
+            triangle2[1] - triangle2[0],
+            triangle2[2] - triangle2[0],
+            np.cross(triangle2[1] - triangle2[0], triangle2[2] - triangle2[0]),
+        ),
+        axis=1,
+    )
+    # return the combination of basis and origin change
+    return (
+        triangle2[0].reshape(3, 1)
+        + Q @ np.linalg.inv(P) @ (points.T - triangle1[0].reshape(3, 1))
+    ).T
+
+
+def extract_layers(
+    verts3d, verts2d, faces, image, spacing=[1, 1, 1], layers=np.linspace(-1, 1, 3)
+):
+    """
+    Extract layers from an image around a 3D mesh projected in 2D
+
+    Parameters
+    ----------
+    verts3d: ndarray (N3,3)
+        Vertices of the 3D mesh  (x,y,z)
+    verts2d: ndarray (N2,2)
+        Vertices of the 2D mesh (x,y)
+    faces: ndarray (M,3)
+        Faces of the mesh (triangles)
+    image: ndarray
+        Input 3D array
+    spacing: list
+        Pixel spacing of the image
+    layers: ndarray (K,)
+        Position of layers to extract
+
+    Results
+    -------
+    extracted_layers: ndarray
+
+    """
+
+    if image.ndim != 3:
+        raise Exception(f"Image dimentionality ({image.ndim}) should be 3.")
+    if verts3d.shape[1] != 3:
+        raise Exception(f"verts3d shape ({verts3d.shape}) should be (N,3)")
+    if verts2d.shape[1] != 2:
+        raise Exception(f"verts3d shape ({verts3d.shape}) should be (N,2)")
+    if faces.shape[1] != 3:
+        raise Exception(f"faces shape ({verts3d.shape}) should be (M,3)")
+
+    spacing = np.array(spacing)
+    verts3d = verts3d / spacing
+    verts2d = verts2d / spacing[:2]
+
+    # compute the shape of the accumulators from verts2d and the number of layers
+    lower = np.floor(np.min(verts2d, axis=0)).astype(int)
+    upper = np.ceil(np.max(verts2d, axis=0)).astype(int)
+    bbox = upper - lower
+    shape = [bbox[0], bbox[1], len(layers)]  # yxz
+    acc1 = np.zeros(shape)
+    acc2 = np.zeros(shape)
+
+    # compute the 2d xyz pixel grid as N x[x,y,z]
+    grid = np.stack(
+        [v.ravel() for v in np.meshgrid(*[np.arange(n) for n in shape], indexing="xy")],
+        1,
+    )
+
+    for face in faces:
+        # compute the coordinates of the 2d triangle
+        triangle2d = np.zeros((3, 3))
+        triangle2d[:, :2] = verts2d[face, :] - lower
+        # list points [xyz] of the grid inside the 2d triangle
+        idx = _points_in_triangle(grid, triangle2d[:, :2])
+        if len(idx) > 0:
+            # compute the coordinates of the 3d triangle
+            triangle3d = verts3d[face, :]
+            # compute the coordinate applying layer
+            dst = grid[idx, :]
+            dst[:, -1] = layers[dst[:, -1]]
+            # get 3d points the corresponding matching 2d points
+            src = _map_point_in_triangle(dst, triangle2d, triangle3d)
+            # get the values in the initial image
+            values = ndi.map_coordinates(image, src.T)
+            # add the value in the accumulator
+            acc1[grid[idx, 0], grid[idx, 1], grid[idx, 2]] += values
+            acc2[grid[idx, 0], grid[idx, 1], grid[idx, 2]] += values > 0
+    # normalize the accumulator
+    acc1[acc2 > 1] /= acc2[acc2 > 1]
+    extracted_layers = acc1
+    return extracted_layers

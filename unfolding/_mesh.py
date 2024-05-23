@@ -1,28 +1,36 @@
 """Manipulate and unfold tesselations"""
 
+from itertools import combinations
+
 import numpy as np
-
 import skimage
-
 from matplotlib import pyplot as plt
 
-import pymeshlab as ml
+from sklearn.manifold import smacof
 
 
-def create_simplified_tessellation(
-    label: np.ndarray, num_vertices: int = 30, initial_step_size: float = 2
+def mesh_from_label(
+    label,
+    spacing=[1, 1, 1],
+    initial_step_size: float = 2,
+    num_vertices: int = 30,
+    method="meshlab",
 ):
     """
-    Extract a surface mesh from the label volume and simplifies
+    Extract a surface mesh from the label volume and simplifies it
 
     Parameters
     ----------
     label: ndarray
         3D numpy array label map (binary values)
-    num_vertices: int
-        number of vertices (default = 30)
+    spacing: List
+        pixel spacing
     initial_step_size: float
         step size for the marching cubes algorithm
+    num_vertices: int
+        number of vertices (default = 30)
+    method: str
+        pymeshlab or fast
 
     Returns
     -------
@@ -31,38 +39,71 @@ def create_simplified_tessellation(
     faces: ndarray
         Faces of the mesh
 
+    Note
+    ----
+    Uses fast_simplification instead of pymeshlab
+
     """
-
     verts, faces, _, _ = skimage.measure.marching_cubes(
-        label, 0.0, step_size=initial_step_size, allow_degenerate=False
+        label,
+        level=0.0,
+        spacing=spacing,
+        step_size=initial_step_size,
+        allow_degenerate=False,
     )
+    if method == "meshlab":
+        import pymeshlab as ml
 
-    # simplify mesh
-    m = ml.Mesh(verts, faces)
+        # simplify mesh
+        m = ml.Mesh(verts, faces)
 
-    # Generate meshSet and add mesh
-    ms = ml.MeshSet()
-    ms.add_mesh(m)
-    numFaces = 100 + 2 * num_vertices
-    while ms.current_mesh().vertex_number() > num_vertices:
-        ms.apply_filter(
-            "meshing_decimation_quadric_edge_collapse",
-            targetfacenum=numFaces,
-            preservenormal=True,
-        )
-        numFaces = numFaces - (ms.current_mesh().vertex_number() - num_vertices)
-    m = ms.current_mesh()
-    verts = m.vertex_matrix()
-    faces = m.face_matrix()
+        # Generate meshSet and add mesh
+        ms = ml.MeshSet()
+        ms.add_mesh(m)
+        numFaces = 100 + 2 * num_vertices
+        while ms.current_mesh().vertex_number() > num_vertices:
+            ms.apply_filter(
+                "meshing_decimation_quadric_edge_collapse",
+                targetfacenum=numFaces,
+                preservenormal=True,
+            )
+            numFaces = numFaces - (ms.current_mesh().vertex_number() - num_vertices)
+        m = ms.current_mesh()
+        verts = np.array(m.vertex_matrix())
+        faces = np.array(m.face_matrix())
+    else:
+        import fast_simplification
+
+        ratio = 1 - num_vertices / verts.shape[0]
+        verts, faces = fast_simplification.simplify(verts, faces, ratio)
 
     return verts, faces
 
 
-def unfold_tessellation(
+def find_center_triangle(verts, faces):
+    """
+    Find the triangle the most at the center
+
+    Parameters
+    ----------
+    verts: ndarray
+        Vertices of the mesh
+    faces: ndarray
+        Faces of the mesh
+
+    Returns
+    -------
+    Index of the center triangle
+    """
+    d = np.linalg.norm(verts - (np.amax(verts, 0) + np.amin(verts, 0)) / 2, axis=1)
+    return np.argmin(np.sum(d[faces], axis=1))
+
+
+def unfold(
     verts: np.ndarray, faces: np.ndarray, base_triangle: int = 0, draw: bool = False
 ):
     """
-    Unfold the tesselation
+    Unfold the mesh
 
     Parameters
     ----------
@@ -189,3 +230,50 @@ def find_2d_coordinates(vertices_3D, vertices_2D, orientation):
         + unit_vector01 * np.cos(gamma) * b
         + unit_vector01_perp * np.sin(gamma) * b
     )
+
+
+def smacof_mesh(vertices, faces):
+    """
+    Project the 3D vertices in 2D using the SMACOF algorithm
+
+    Parameters
+    ----------
+    vertices : ndarray (N,3)
+        Vertices of the mesh
+    faces: ndarray (M,3)
+        Faces (triangles) of the mesh
+
+    Returns
+    -------
+    vertices: ndarray (N,2)
+        Projected vertices in 2D
+
+    """
+
+    similarity = np.zeros((vertices.shape[0], vertices.shape[0]))
+    for face in faces:
+        for i, j in combinations(face, 2):
+            d = np.linalg.norm(vertices[i, :] - vertices[j, :])
+            similarity[i, j] = d
+            similarity[j, i] = d
+
+    # similarity with zeros are considered as missing values
+    # when using metric=False
+    coords, _ = smacof(
+        dissimilarities=similarity,
+        n_components=2,
+        init=vertices[:, :2],
+        n_init=1,
+        metric=False,
+    )
+
+    # Rescale the coordinates because we are not metric
+    coords = (coords - np.amin(coords, 0)) / (np.amax(coords, 0) - np.amin(coords, 0))
+    coords = np.amin(vertices[:, :2], 0) + coords * (
+        np.amax(vertices[:, :2], 0) - np.amin(vertices[:, :2], 0)
+    )
+    return coords
+
+
+def project_mesh(vertices, faces):
+    return vertices[:, :2], faces

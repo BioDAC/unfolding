@@ -60,9 +60,15 @@ HOW TO ACKNOWLEDGE
 INSTALLATION
 -------------------------------------------------------------------------------
 
-To install the package:
+To install the package from github directly:
 ```bash
 pip install git+https://github.com/akarsa/unfolding
+```
+or clone the repository and install locally:
+```bash
+git clone https://github.com/akarsa/unfolding
+cd unfolding
+pip install -e .
 ```
 
 

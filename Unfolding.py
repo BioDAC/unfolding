@@ -9,9 +9,9 @@ import numpy as np
 # import sys
 
 # sys.path.append("../")
-from unfolding._tessellation import (  # noqa: E402
+from unfolding._mesh import (  # noqa: E402
     create_simplified_tessellation,
-    unfold_tessellation,
+    unfold,
     unfolded_layers,
     draw_triangles_in_3d_and_2d,
     show_3d_and_contours,
@@ -40,9 +40,7 @@ verts, faces = create_simplified_tessellation(
 # num_vertices: target number of vertices in the simplified tessellation
 
 # unfold tessellation
-verts_2d, faces_2d, dict_2d_3d = unfold_tessellation(
-    verts, faces, base_triangle=0, draw=0
-)
+verts_2d, faces_2d, dict_2d_3d = unfold(verts, faces, base_triangle=0, draw=0)
 # base_triangle: the index of the row in faces that contains the first triangle to consider
 # (this will be the middle of the unfolded surface)
 # draw: 0 or 1 indicating whether the function should plot the unfolded tessellation or not

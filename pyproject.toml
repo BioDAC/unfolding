@@ -9,6 +9,7 @@ dependencies = [
   "numpy",
   "scipy",
   "scikit-image",
+  "scikit-learn",
   "pymeshlab",
 ]
 requires-python = ">=3.0"
