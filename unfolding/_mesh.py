@@ -7,6 +7,7 @@ import skimage
 from matplotlib import pyplot as plt
 
 from sklearn.manifold import smacof
+import networkx as nx
 
 
 def mesh_from_label(
@@ -249,28 +250,24 @@ def smacof_mesh(vertices, faces):
         Projected vertices in 2D
 
     """
-
-    similarity = np.zeros((vertices.shape[0], vertices.shape[0]))
+    # compute the distance matrix using shortest path on the mesh
+    G = nx.Graph()
     for face in faces:
         for i, j in combinations(face, 2):
             d = np.linalg.norm(vertices[i, :] - vertices[j, :])
-            similarity[i, j] = d
-            similarity[j, i] = d
-
-    # similarity with zeros are considered as missing values
-    # when using metric=False
+            G.add_edge(i, j, length=d)
+    distances = dict(nx.all_pairs_dijkstra_path_length(G, weight="length"))
+    similarity = np.zeros((vertices.shape[0], vertices.shape[0]))
+    for i in range(vertices.shape[0]):
+        for j in range(vertices.shape[0]):
+            similarity[i, j] = distances[i][j]
     coords, _ = smacof(
         dissimilarities=similarity,
         n_components=2,
-        init=vertices[:, :2],
+        init=(vertices[:, :2] - vertices[:, :2].mean()),
         n_init=1,
-        metric=False,
-    )
-
-    # Rescale the coordinates because we are not metric
-    coords = (coords - np.amin(coords, 0)) / (np.amax(coords, 0) - np.amin(coords, 0))
-    coords = np.amin(vertices[:, :2], 0) + coords * (
-        np.amax(vertices[:, :2], 0) - np.amin(vertices[:, :2], 0)
+        metric=True,
+        eps=1e-12,
     )
     return coords
 

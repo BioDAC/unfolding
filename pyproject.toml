@@ -10,6 +10,7 @@ dependencies = [
   "scipy",
   "scikit-image",
   "scikit-learn",
+  "networkx",
   "pymeshlab",
 ]
 requires-python = ">=3.0"

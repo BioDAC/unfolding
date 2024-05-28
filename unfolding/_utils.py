@@ -2,8 +2,8 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 
-def dummy():
-    """Create a dummy image and label"""
+def shpere():
+    """Create a shpere image and label"""
 
     x, y, z = np.meshgrid(
         np.linspace(0, 1, 100), np.linspace(0, 1, 100), np.linspace(0, 1, 100)
@@ -16,6 +16,26 @@ def dummy():
     return image, label
 
 
+def half_sphere(n=10):
+    """Create a dumy test example with a halph sphere"""
+    vi = np.linspace(0, 100, n)
+    xi, yi = np.meshgrid(vi, vi, indexing="xy")
+    zi = 100 - np.sqrt(np.maximum(0, 50 * 50 - (xi - 50) ** 2 - (yi - 50) ** 2))
+    verts = np.stack((xi.ravel(), yi.ravel(), zi.ravel()), axis=1)
+    tri = Delaunay(verts)
+    faces = tri.simplices
+
+    v = np.arange(100)
+    x, y, z = np.meshgrid(v, v, v, indexing="ij")
+    label = (x - 50) ** 2 + (y - 50) ** 2 < 51 * 51 - (z - 100) ** 2
+    image = 1 + (
+        np.cos(2 * np.pi * x / 100)
+        * np.cos(6 * np.pi * y / 100)
+        * np.cos(np.pi * z / 100)
+    )
+    return image, label, verts, faces
+
+
 def conic(n=10):
     """Create a dumy test example with a conic"""
     vi = np.linspace(0, 100, n)
@@ -24,6 +44,7 @@ def conic(n=10):
     verts = np.stack((xi.ravel(), yi.ravel(), zi.ravel()), axis=1)
     tri = Delaunay(verts)
     faces = tri.simplices
+
     v = np.arange(100)
     x, y, z = np.meshgrid(v, v, v, indexing="ij")
     label = ((x - 50) ** 2 + (y - 50) ** 2) / 50 < z
@@ -58,9 +79,7 @@ def plane():
 def flat():
     """Create a flat test example"""
 
-    xi, yi = np.meshgrid(
-        np.linspace(0, 150, 5), np.linspace(0, 100, 5), indexing="xy"
-    )
+    xi, yi = np.meshgrid(np.linspace(0, 150, 5), np.linspace(0, 100, 5), indexing="xy")
     zi = 60 * np.ones(xi.shape)
     verts = np.stack((xi.ravel(), yi.ravel(), zi.ravel()), axis=1)
     tri = Delaunay(verts[:, :2])

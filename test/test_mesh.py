@@ -2,13 +2,13 @@
 
 import numpy as np
 from scipy.spatial import distance_matrix
-from unfolding import unfold, create_simplified_tessellation
-from unfolding._utils import dummy, conic, plane
+from unfolding import unfold, mesh_from_label
+from unfolding._utils import shpere, conic, plane
 
 
 def test_create_simplified_tesselation():
-    _, label = dummy()
-    verts, faces = create_simplified_tessellation(label, num_vertices=30)
+    _, label = shpere()
+    verts, faces = mesh_from_label(label, num_vertices=30)
     verts_true = np.load("test/verts.npy")
     faces_true = np.load("test/faces.npy")
     assert np.linalg.norm(verts - verts_true) < 1e-3
@@ -18,7 +18,7 @@ def test_create_simplified_tesselation():
 def test_create_simplified_tesselation_conic():
     """Compare the tesseslation to a delaunay tesselation of the conic function"""
     _, label, verts_true, faces_true = conic()
-    verts, _ = create_simplified_tessellation(label, num_vertices=faces_true.shape[0])
+    verts, _ = mesh_from_label(label, num_vertices=faces_true.shape[0])
     d = np.amin(distance_matrix(verts, verts_true), 0)
     assert d.max() < 20
     assert d.mean() < 5
@@ -27,7 +27,7 @@ def test_create_simplified_tesselation_conic():
 def test_create_simplified_tesselation_plane():
     """Compare the tesseslation to a delaunay tesselation of the conic function"""
     _, label, verts_true, faces_true = plane()
-    verts, _ = create_simplified_tessellation(label, num_vertices=faces_true.shape[0])
+    verts, _ = mesh_from_label(label, num_vertices=faces_true.shape[0])
     d = np.amin(distance_matrix(verts, verts_true), 0)
     assert d.max() < 10
     assert d.mean() < 5

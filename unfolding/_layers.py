@@ -10,9 +10,11 @@ from math import floor, ceil
 from ._utils import triangle_area
 
 
-def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, spacing=[1,1,1], n_layers=1):
+def unfold_layers(
+    verts, faces, verts_2d, faces_2d, dict_2d_3d, im, spacing=[1, 1, 1], n_layers=1
+):
     """
-    Extract layers from the volume
+    Extract layers from the volume using unfolded mesh
 
     Parameters
     ----------
@@ -20,7 +22,7 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, spacing=[1
     verts_2d, faces_2d, dict_2d_3d: 2D vertice coordinates and triangle faces,
     and the correspondence dictionary between 3D and 2D vertices from unfold_tessellation
     im: 3D numpy array containing the grayscale image
-    spacing: ndarray 
+    spacing: ndarray
     pixel spacing
     n_layers: number of layers to be exported on both sides of the tessellation
 
@@ -30,8 +32,8 @@ def unfolded_layers(verts, faces, verts_2d, faces_2d, dict_2d_3d, im, spacing=[1
 
 
     """
-    verts = [v/spacing for v in verts]
-    verts_2d = [v/spacing[:2] for v in verts_2d]
+    verts = [v / spacing for v in verts]
+    verts_2d = [v / spacing[:2] for v in verts_2d]
     # Create an image to save the unfolded layers
     x = [vert[0] for vert in verts_2d]
     pix_x0 = np.min(x)
@@ -503,7 +505,9 @@ def extract_layers(
     verts3d, verts2d, faces, image, spacing=[1, 1, 1], layers=np.linspace(-1, 1, 3)
 ):
     """
-    Extract layers from an image around a 3D mesh projected in 2D
+    Extract layers from an image around a 3D mesh projected in 2D.
+
+    Use mapping of coordinates in triangles to map 2d to 3d.
 
     Parameters
     ----------

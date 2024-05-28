@@ -4,7 +4,7 @@ __all__ = [
     "mesh_from_label",
     "find_center_triangle",
     "unfold",
-    "unfolded_layers",
+    "unfold_layers",
     "show_3d_and_contours",
     "draw_triangles_in_3d_and_2d",
     "extract_layers",
@@ -17,5 +17,5 @@ from unfolding._mesh import (
     find_center_triangle,
     smacof_mesh,
 )
-from unfolding._layers import unfolded_layers, extract_layers
+from unfolding._layers import unfold_layers, extract_layers
 from unfolding._display import show_3d_and_contours, draw_triangles_in_3d_and_2d

@@ -1,18 +1,18 @@
 import numpy as np
-from unfolding import unfolded_layers, extract_layers
+from unfolding import unfold_layers, extract_layers
 from unfolding._layers import _map_point_in_triangle
-from unfolding._utils import dummy, flat
+from unfolding._utils import shpere, flat
 from numpy.testing import assert_array_almost_equal
 
 
 def test_unfolded_layers():
-    image, _ = dummy()
+    image, _ = shpere()
     verts = np.load("test/verts.npy")
     faces = np.load("test/faces.npy")
     verts_2d = np.load("test/verts_2d.npy")
     faces_2d = np.load("test/faces_2d.npy")
     dict_2d_3d = np.load("test/dict_2d_3d.npy")
-    layers = unfolded_layers(
+    layers = unfold_layers(
         verts, faces, verts_2d, faces_2d, dict_2d_3d, image, n_layers=20
     )
     layers_true = np.load("test/layers.npy")
@@ -45,12 +45,12 @@ def test_flat_layer():
 def test_flat_layer_unfold():
     """A flat plane layer should be identical after projection"""
     image, _, verts, faces = flat()
-    layers = unfolded_layers(
+    layers = unfold_layers(
         verts, faces, verts[:, :2], faces, np.arange(verts.shape[0]), image, n_layers=1
     )
     layers_true = image[0 : layers.shape[0] + 1, 0 : layers.shape[1], 60]
-    assert_array_almost_equal(layers[10:50, 10:50, 1], layers_true[10:50, 10:50], 3)
+    assert_array_almost_equal(layers[10:50, 10:50, 1], layers_true[10:50, 10:50], 0)
 
 
 def test_extract_layer():
-    image, _ = dummy()
+    image, _ = shpere()
