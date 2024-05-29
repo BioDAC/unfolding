@@ -1,12 +1,12 @@
 import numpy as np
 from unfolding import unfold_layers, extract_layers
 from unfolding._layers import _map_point_in_triangle
-from unfolding._utils import shpere, flat
+from unfolding._utils import sphere, flat
 from numpy.testing import assert_array_almost_equal
 
 
 def test_unfolded_layers():
-    image, _ = shpere()
+    image, _ = sphere()
     verts = np.load("test/verts.npy")
     faces = np.load("test/faces.npy")
     verts_2d = np.load("test/verts_2d.npy")
@@ -53,4 +53,4 @@ def test_flat_layer_unfold():
 
 
 def test_extract_layer():
-    image, _ = shpere()
+    image, _ = sphere()

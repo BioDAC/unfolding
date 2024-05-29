@@ -3,11 +3,11 @@
 import numpy as np
 from scipy.spatial import distance_matrix
 from unfolding import unfold, mesh_from_label
-from unfolding._utils import shpere, conic, plane
+from unfolding._utils import sphere, conic, plane
 
 
-def test_create_simplified_tesselation():
-    _, label = shpere()
+def test_mesh_from_label():
+    _, label = sphere()
     verts, faces = mesh_from_label(label, num_vertices=30)
     verts_true = np.load("test/verts.npy")
     faces_true = np.load("test/faces.npy")

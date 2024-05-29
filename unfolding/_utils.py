@@ -2,12 +2,19 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 
-def shpere():
-    """Create a shpere image and label"""
+def sphere():
+    """Create a sphere image and label
 
-    x, y, z = np.meshgrid(
-        np.linspace(0, 1, 100), np.linspace(0, 1, 100), np.linspace(0, 1, 100)
-    )
+    Returns
+    -------
+    image: ndarray
+        intensity 3d image
+    label : ndarray
+        binary image with bounday corresponding to the surface to extract
+
+    """
+    v = np.linspace(0, 1, 100)
+    x, y, z = np.meshgrid(v, v, v)
 
     image = x + y + z
 
@@ -17,7 +24,24 @@ def shpere():
 
 
 def half_sphere(n=10):
-    """Create a dumy test example with a halph sphere"""
+    """Create a dumy test example with a halph sphere
+
+    Parameters
+    ----------
+    n : int
+        Number of point along each axis
+
+    Returns
+    -------
+    image: ndarray
+        intensity 3d image
+    label : ndarray
+        binary image with bounday corresponding to the surface to extract
+    verts: ndarray (N,3)
+        vertices of the mesh
+    faces: ndarray (M,3)
+        triangles of the mesh
+    """
     vi = np.linspace(0, 100, n)
     xi, yi = np.meshgrid(vi, vi, indexing="xy")
     zi = 100 - np.sqrt(np.maximum(0, 50 * 50 - (xi - 50) ** 2 - (yi - 50) ** 2))
@@ -37,7 +61,24 @@ def half_sphere(n=10):
 
 
 def conic(n=10):
-    """Create a dumy test example with a conic"""
+    """Create a dumy test example with a conic
+
+    Parameters
+    ----------
+    n : int
+        Number of point along each axis
+
+    Returns
+    -------
+    image: ndarray
+        intensity 3d image
+    label : ndarray
+        binary image with bounday corresponding to the surface to extract
+    verts: ndarray (N,3)
+        vertices of the mesh
+    faces: ndarray (M,3)
+        triangles of the mesh
+    """
     vi = np.linspace(0, 100, n)
     xi, yi = np.meshgrid(vi, vi, indexing="xy")
     zi = ((xi - 50) ** 2 + (yi - 50) ** 2) / 50
@@ -57,7 +98,25 @@ def conic(n=10):
 
 
 def plane():
-    """Create a dumy test example with a plane"""
+    """Create a dumy test example with a plane
+
+    Parameters
+    ----------
+    n : int
+        Number of point along each axis
+
+    Returns
+    -------
+    image: ndarray
+        intensity 3d image
+    label : ndarray
+        binary image with bounday corresponding to the surface to extract
+    verts: ndarray (N,3)
+        vertices of the mesh
+    faces: ndarray (M,3)
+        triangles of the mesh
+
+    """
     vi = np.linspace(0, 100, 10)
     xi, yi = np.meshgrid(vi, vi, indexing="xy")
     zi = xi
@@ -77,7 +136,25 @@ def plane():
 
 
 def flat():
-    """Create a flat test example"""
+    """Create a flat test example
+
+    Parameters
+    ----------
+    n : int
+        Number of point along each axis
+
+    Returns
+    -------
+    image: ndarray
+        intensity 3d image
+    label : ndarray
+        binary image with bounday corresponding to the surface to extract
+    verts: ndarray (N,3)
+        vertices of the mesh
+    faces: ndarray (M,3)
+        triangles of the mesh
+
+    """
 
     xi, yi = np.meshgrid(np.linspace(0, 150, 5), np.linspace(0, 100, 5), indexing="xy")
     zi = 60 * np.ones(xi.shape)
