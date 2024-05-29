@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Karsa
+    given-names: Anita
+    orcid: https://orcid.org/0000-0002-8648-3853
+title: "Unfolding"
+version: 2024-05-15
+identifiers:
+  - type: doi
+    value: #10.5281/zenodo.1234
+date-released: 2024-05-15

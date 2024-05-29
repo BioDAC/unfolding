@@ -1,0 +1,7 @@
+  numpy
+  scipy
+  scikit-image
+  scikit-learn
+  networkx
+  pymeshlab
+  fast_simplification

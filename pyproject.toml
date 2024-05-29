@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unfolding"
+version = "0.1.0"
+dependencies = [
+  "numpy",
+  "scipy",
+  "scikit-image",
+  "scikit-learn",
+  "networkx",
+  "pymeshlab",
+]
+requires-python = ">=3.0"
+authors = [
+  {name = "Anita Karsa", email = "ak2557@cam.ac.uk"},  
+]
+maintainers = [
+  {name = "Anita Karsa", email = "ak2557@cam.ac.uk"},  
+  
+]
+description = "Unfolding 3D surfaces in a grayscale volume into a 2D image."
+readme = "README.md"
+license = {file = "LICENSE.md"}
+
+
+[tool.black]
+target-version = ['py310', 'py311', 'py312']
+
+[tool.ruff.lint]
+select = [
+    'F',
+    'E',
+    'W',
+    'UP',
+    'NPY201',
+]
+ignore = [
+    'E501',
+    'E741',
+    'E712',
+]
