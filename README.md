@@ -14,11 +14,11 @@ INSTALLATION
 
 To install the package from github directly:
 ```bash
-pip install git+https://github.com/akarsa/unfolding
+pip install git+https://github.com/BioDAC/unfolding
 ```
 or clone the repository and install the package:
 ```bash
-git clone https://github.com/akarsa/unfolding
+git clone https://github.com/BioDAC/unfolding
 cd unfolding
 pip install -e .
 ```
