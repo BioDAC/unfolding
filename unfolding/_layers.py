@@ -561,7 +561,7 @@ def extract_layers(
         # compute the coordinates of the 2d triangle
         triangle2d = np.zeros((3, 3))
         triangle2d[:, :2] = verts2d[face, :] - lower
-        # list points [xyz] of the grid inside the 2d triangle
+        # list indices of the grid inside the 2d triangle
         idx = _points_in_triangle(grid, triangle2d[:, :2])
         if len(idx) > 0:
             # compute the coordinates of the 3d triangle

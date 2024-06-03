@@ -5,3 +5,4 @@
   networkx
   pymeshlab
   fast_simplification
+  matplotlib
