@@ -6,3 +6,4 @@
   pymeshlab
   fast_simplification
   matplotlib
+  tqdm
